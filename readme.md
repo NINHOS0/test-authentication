@@ -61,12 +61,12 @@ Valida o login do usuário usando o `username` e a `password` fornecido no formu
 
 Para clonar o repositório, execute o seguinte comando no seu terminal:
 ```bash
-git  clone  https://github.com/seu-usuario/seu-repositorio.git
+git clone https://github.com/NINHOS0/test-authentication
 ```
 
 ### 2. Navegar até a pasta do projeto
 ```bash
-cd seu-repositorio
+cd test-authentication
 ```
 
 ### 3. Instalar as dependências do backend
@@ -96,4 +96,4 @@ npm run dev
 ```
 
 ### 7. Acessar a aplicação
-Agora você pode acessar a aplicação no seu navegador. O frontend normalmente estará disponível em `http://localhost:3000` e o backend em `http://localhost:5000` (os endereços podem variar conforme a configuração do seu projeto).
+Agora você pode acessar a aplicação no seu navegador. O frontend normalmente estará disponível em `http://localhost:5173` e o backend em `http://localhost:3333/api/validate`
