@@ -11,7 +11,7 @@ import {
   type UseDisclosureReturn,
 } from "@chakra-ui/react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { CreateUserFormSchema, type CreateUserFormType } from "../utils/schemas/CreateUserSchema";
+import { CreateUserFormSchema, type CreateUserFormType } from "../../utils/schemas/user/CreateUserSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 

@@ -17,3 +17,21 @@ model users {
 
   @@map("User")
 }
+
+model clients {
+  id         String @id @unique @default(uuid())
+  cnpj       String @unique
+  name       String
+  fantasy    String
+  address    String
+  number     Int
+  complement String
+  cep        Int
+  district   String
+  city       String
+  state      String
+  email      String
+  phone   String
+
+  @@map("Client")
+}

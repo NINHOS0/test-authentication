@@ -14,8 +14,8 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import {
   UpdateUserFormSchema,
   type UpdateUserFormType,
-} from "../utils/schemas/UpdateUserSchema";
-import type { UserDataType } from "../utils/schemas/UserData";
+} from "../../utils/schemas/user/UpdateUserSchema";
+import type { UserDataType } from "../../utils/schemas/user/UserData";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 

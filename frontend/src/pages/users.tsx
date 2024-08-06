@@ -7,14 +7,15 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/axios";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
-import { CreateUserModal } from "../components/createUserModal";
-import { DeleteUserModal } from "../components/deleteUserModal";
+import { CreateUserModal } from "../components/user/createUserModal";
+import { DeleteUserModal } from "../components/user/deleteUserModal";
 import type { AxiosError, AxiosResponse } from "axios";
 import type { SubmitHandler } from "react-hook-form";
-import type { CreateUserFormType } from "../utils/schemas/CreateUserSchema";
-import type { UpdateUserFormType } from "../utils/schemas/UpdateUserSchema";
-import { UpdateUserModal } from "../components/updateUserModal";
-import type { UserDataType } from "../utils/schemas/UserData";
+import type { CreateUserFormType } from "../utils/schemas/user/CreateUserSchema";
+import type { UpdateUserFormType } from "../utils/schemas/user/UpdateUserSchema";
+import { UpdateUserModal } from "../components/user/updateUserModal";
+import type { UserDataType } from "../utils/schemas/user/UserData";
+import { SideBar } from "../components/sideBar";
 
 export const UsersPage = () => {
   const createUserDisclosure = useDisclosure();
@@ -118,10 +119,10 @@ export const UsersPage = () => {
   useEffect(getData, [users]);
 
   return (
-    <div className="h-screen bg-zinc-950 text-white flex justify-center pt-32">
-      <div className="sm:w-[1024px] w-4 overflow-x-auto mx-12">
+    <>
+      <div className="overflow-x-auto m-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-semibold">Tabela Usuários</h1>
+          <h1 className="text-3xl font-semibold">Usuários</h1>
 
           <Button colorScheme="blue" onClick={createUserDisclosure.onOpen}>
             Adicionar
@@ -137,9 +138,8 @@ export const UsersPage = () => {
           </tr>
           {users.map((user, index) => (
             <tr
-              className={`grid grid-cols-[24em,10em,24em,5em] gap-1 grid-rows-1 ${
-                index % 2 == 1 && "bg-zinc-900"
-              }`}
+              className={`grid grid-cols-[24em,10em,24em,5em] gap-1 grid-rows-1 ${index % 2 == 1 && "bg-zinc-900"
+                }`}
               key={user.username}
             >
               <td>{user.id}</td>
@@ -186,6 +186,6 @@ export const UsersPage = () => {
         updateUserDisclosure={updateUserDisclosure}
         userSelected={userSelected}
       />
-    </div>
+    </>
   );
 };

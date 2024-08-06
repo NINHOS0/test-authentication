@@ -1,5 +1,5 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { FormSchema, type IFormSchema } from "../utils/schemas/FormSchema";
+import { FormSchema, FormType } from "../utils/schemas/user/FormSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { AxiosResponse } from "axios";
 import { useToast } from "@chakra-ui/toast";
@@ -17,11 +17,11 @@ export const LoginPage = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<IFormSchema>({
+  } = useForm<FormType>({
     resolver: zodResolver(FormSchema),
   });
 
-  const onSubmit: SubmitHandler<IFormSchema> = async (data) => {
+  const onSubmit: SubmitHandler<FormType> = async (data) => {
     const { username, password } = data;
 
     const response: AxiosResponse = await api
@@ -65,7 +65,7 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="h-screen bg-zinc-950 text-white flex justify-center items-center">
+    <div className="h-screen flex justify-center items-center">
       <div className="sm:w-72">
         <h1 className="text-3xl font-semibold mb-4">Entrar</h1>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -74,11 +74,10 @@ export const LoginPage = () => {
               <input
                 placeholder="Nome de usuário"
                 {...register("username")}
-                className={`w-full outline-none border px-4 py-2 rounded-md placeholder:font-medium ${
-                  errors.username
-                    ? "border-red-400 bg-red-600/5"
-                    : "border-white bg-transparent focus:border-blue-400 focus:bg-blue-600/5 "
-                } focus:scale-[1.015] transition-all`}
+                className={`w-full outline-none border px-4 py-2 rounded-md placeholder:font-medium ${errors.username
+                  ? "border-red-400 bg-red-600/5"
+                  : "border-white bg-transparent focus:border-blue-400 focus:bg-blue-600/5 "
+                  } focus:scale-[1.015] transition-all`}
                 autoComplete="off"
               />
 
@@ -93,11 +92,10 @@ export const LoginPage = () => {
                 placeholder="Senha"
                 type="password"
                 {...register("password")}
-                className={`w-full outline-none border px-4 py-2 rounded-md placeholder:font-medium ${
-                  errors.password
-                    ? "border-red-400 bg-red-600/5"
-                    : "border-white bg-transparent focus:border-blue-400 focus:bg-blue-600/5 "
-                } focus:scale-[1.015] transition-all`}
+                className={`w-full outline-none border px-4 py-2 rounded-md placeholder:font-medium ${errors.password
+                  ? "border-red-400 bg-red-600/5"
+                  : "border-white bg-transparent focus:border-blue-400 focus:bg-blue-600/5 "
+                  } focus:scale-[1.015] transition-all`}
                 autoComplete="off"
               />
 

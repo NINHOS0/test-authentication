@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z, { string } from "zod";
-import { prisma } from "../lib/prisma";
-import { hashData } from "../utils/hashData";
+import { prisma } from "../../lib/prisma";
+import { hashData } from "../../utils/hashData";
 
 export async function CreateUserRoute(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
