@@ -22,6 +22,7 @@ const ClientDataSchema = BaseClientSchema.extend({ id: z.string().uuid() });
 type CreateClientFormType = z.infer<typeof CreateClientFormSchema>;
 type UpdateClientFormType = z.infer<typeof UpdateClientFormSchema>;
 type ClientDataType = z.infer<typeof ClientDataSchema>;
+type ClientFilters = "cnpj" | "name" | "fantasy" | "address" | "number" | "complement" | "cep" | "district" | "city" | "state" | "email" | "phone"
 
 export { CreateClientFormSchema, UpdateClientFormSchema, ClientDataSchema };
-export type { CreateClientFormType, UpdateClientFormType, ClientDataType };
+export type { ClientFilters,  CreateClientFormType, UpdateClientFormType, ClientDataType };

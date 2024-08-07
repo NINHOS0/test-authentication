@@ -3,23 +3,35 @@ import { AxiosError, AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
 import { api } from "../lib/axios";
 import { CreateClientModal } from "../components/client/createClientModal";
-import { Button, IconButton, Message, useToaster } from "rsuite";
+import { Button, IconButton, Message, SelectPicker, useToaster } from "rsuite";
 import Column from "rsuite/esm/Table/TableColumn";
 import { Cell, HeaderCell, Table } from "rsuite-table";
 import EditIcon from "@rsuite/icons/Edit";
 import TrashIcon from "@rsuite/icons/Trash";
 import { SideBar } from "../components/sideBar";
 import { useDisclosure } from "../utils/useDisclosure";
-import type {
-  ClientDataType,
-  CreateClientFormType,
-  UpdateClientFormType,
+import {
+  ClientDataSchema,
+  ClientFilters,
+  type ClientDataType,
+  type CreateClientFormType,
+  type UpdateClientFormType,
 } from "../utils/schemas/clients-schemas";
+import { UpdateClientModal } from "../components/client/updateClientModal";
+import { DeleteClientModal } from "../components/client/deleteClientModal";
+import { Input } from "@chakra-ui/react";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
+
 
 export const ClientsPage = () => {
   const createClientDisclosure = useDisclosure();
-  const [clients, setClients] = useState<ClientDataType[]>([]);
+  const updateClientDisclosure = useDisclosure();
+  const deleteClientDisclosure = useDisclosure();
   const toaster = useToaster();
+  const navigate = useNavigate()
+
+  const [clients, setClients] = useState<ClientDataType[]>([]);
 
   const [clientSelected, setClientSelected] = useState<
     ClientDataType | undefined
@@ -31,40 +43,55 @@ export const ClientsPage = () => {
       .post("/clients", data)
       .then((res: AxiosResponse<{ message: string; data: ClientDataType }>) => {
         toaster.push(
-          <Message type="success">{res.data.message ?? ""}</Message>
+          <Message type="success">Cliente criado com sucesso!</Message>
         );
         setClients([...clients, res.data.data]);
       })
       .catch((err: AxiosError<{ error?: string }>) => {
         toaster.push(
           <Message type="error">
-            {err.response?.data.error ?? "Erro ao criar cliente"}
+            {err.response?.data.error ?? "Erro ao criar cliente!"}
           </Message>
         );
       });
   };
 
   const updateHandler: SubmitHandler<UpdateClientFormType> = (data) => {
+    updateClientDisclosure.onClose()
     if (!clientSelected) {
       return;
     }
 
     api
-      .patch(`/clients/${clientSelected.id}`)
+      .patch(`/clients/${clientSelected.id}`, data)
       .then((res) => {
         toaster.push(
           <Message type="success">{res.data.message ?? ""}</Message>
         );
-        setClients([...clients, res.data.data]);
+        setClients(clients.map((client) => client.id === clientSelected?.id ? res.data.data : client));
       })
       .catch((err: AxiosError<{ error?: string }>) => {
         toaster.push(
           <Message type="error">
-            {err.response?.data.error ?? "Erro ao modificar cliente"}
+            {err.response?.data.error ?? "Erro ao modificar cliente!"}
           </Message>
         );
       });
   };
+
+  const deleteHandler = () => {
+    deleteClientDisclosure.onClose()
+    if (!clientSelected) {
+      return
+    }
+
+    api.delete(`/clients/${clientSelected.id}`).then((res) => {
+      toaster.push(<Message type="success">{res.data.message ?? ""}</Message>)
+      setClients(clients.filter((client) => client.id !== clientSelected.id))
+    }).catch((err: AxiosError<{ error?: string }>) => {
+      toaster.push(<Message type="error">{err.response?.data.error ?? "Erro ao remover cliente"}</Message>)
+    })
+  }
 
   function getData() {
     api.get("/clients").then((res) => {
@@ -72,14 +99,57 @@ export const ClientsPage = () => {
     });
   }
 
+  useEffect(() => {
+    document.title = "Gerenciar usuários";
+    const token = Cookies.get("auth-token")
+    if (!token) {
+      navigate("/")
+    }
+  }, []);
+
   useEffect(getData, []);
 
+  const getFilters = Object.keys(ClientDataSchema.shape).map(
+    item => ({ label: item, value: item })
+  );
+  const [filterSelected, setFilterSelected] = useState<ClientFilters | null>(null)
+  const [filteredData, setFilteredData] = useState<ClientDataType[] | null>()
+
+  function getFilterData(filterData: string) {
+    if (filterData.length === 0) {
+      setFilteredData(null)
+    }
+    if (filterSelected === null) {
+      return
+    }
+    setFilteredData(clients.filter((client) => client[filterSelected].toString().toLowerCase().includes(filterData.toLowerCase())))
+  }
+
+  
   return (
     <div className="flex">
       <SideBar />
       <div className="overflow-x-auto m-8 flex-1">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-semibold">Clientes</h1>
+        <div className="flex items-end mb-6">
+          <div className="flex flex-1 flex-col gap-4">
+            <h1 className="text-3xl font-semibold">Clientes</h1>
+            <div className="flex gap-4">
+              <SelectPicker
+                data={getFilters}
+                searchable={false}
+                label="Filtrar"
+                className="w-36"
+                menuClassName="hover:text-white"
+                onChange={(data: ClientFilters | null) => setFilterSelected(data)}
+              />
+              {filterSelected && (
+                <>
+                  <Input className="max-w-64" onChange={(data) => getFilterData(data.target.value)} />
+                </>
+              )}
+
+            </div>
+          </div>
 
           <Button
             onClick={createClientDisclosure.onOpen}
@@ -90,7 +160,7 @@ export const ClientsPage = () => {
             Adicionar
           </Button>
         </div>
-        <Table autoHeight data={clients}>
+        <Table autoHeight data={filteredData ?? clients}>
           <Column width={300} resizable fixed>
             <HeaderCell>Id</HeaderCell>
             <Cell dataKey="id" />
@@ -162,12 +232,16 @@ export const ClientsPage = () => {
                     className="bg-transparent focus:bg-transparent hover:bg-blue-500/25 text-blue-500 hover:text-blue-400 focus:text-blue-500"
                     onClick={() => {
                       setClientSelected(rowData);
-                      createClientDisclosure.onOpen();
+                      updateClientDisclosure.onOpen();
                     }}
                   />
                   <IconButton
                     icon={<TrashIcon />}
                     className="bg-transparent focus:bg-transparent hover:bg-red-500/25 text-red-500 hover:text-red-400 focus:text-red-500"
+                    onClick={() => {
+                      setClientSelected(rowData);
+                      deleteClientDisclosure.onOpen();
+                    }}
                   />
                 </div>
               )}
@@ -184,10 +258,10 @@ export const ClientsPage = () => {
         updateClientDisclosure={updateClientDisclosure}
         clientSelected={clientSelected}
       />
-      {/* <DeleteUserModal
+      <DeleteClientModal
         deleteHandler={deleteHandler}
-        deleteUserDisclosure={deleteUserDisclosure}
-      /> */}
+        deleteClientDisclosure={deleteClientDisclosure}
+      />
     </div>
   );
 };

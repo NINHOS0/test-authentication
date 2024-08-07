@@ -8,16 +8,15 @@ const BaseUserSchema = z.object({
 const LoginFormSchema = BaseUserSchema
 const CreateUserFormSchema = BaseUserSchema
 const UpdateUserFormSchema = BaseUserSchema
+const UserDataSchema = BaseUserSchema.extend({id: z.string()})
+const UserFiltersSchema = BaseUserSchema.omit({password: true}).extend({id: z.string().uuid()})
 
-type UserDataType = {
-  id: string;
-  username: string;
-  password: string;
-};
 
 type LoginFormType = z.infer<typeof LoginFormSchema>;
 type CreateUserFormType = z.infer<typeof CreateUserFormSchema>;
 type UpdateUserFormType = z.infer<typeof UpdateUserFormSchema>;
+type UserDataType = z.infer<typeof UserDataSchema>
+type UserFilters = "id" | "username"
 
-export { LoginFormSchema, CreateUserFormSchema, UpdateUserFormSchema };
-export type { LoginFormType, CreateUserFormType, UpdateUserFormType, UserDataType };
+export { UserFiltersSchema, UserDataSchema, LoginFormSchema, CreateUserFormSchema, UpdateUserFormSchema };
+export type { UserFilters, LoginFormType, CreateUserFormType, UpdateUserFormType, UserDataType };

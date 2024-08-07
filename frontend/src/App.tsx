@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import { LoginPage } from "./pages/login";
 import { UsersPage } from "./pages/users";
 import { ClientsPage } from "./pages/clients";
+import { PrivateRoute } from "./components/privateRoute";
 
 function App() {
   return (

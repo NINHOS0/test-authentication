@@ -1,34 +1,34 @@
 import { Button, Modal } from "rsuite";
 import { UseDisclosureReturn } from "../../utils/useDisclosure";
 
-interface DeleteUserModalProps {
-  deleteUserDisclosure: UseDisclosureReturn;
+interface DeleteClientModalProps {
+  deleteClientDisclosure: UseDisclosureReturn;
   deleteHandler: () => void
 }
 
-export const DeleteUserModal = ({
-  deleteUserDisclosure,
+export const DeleteClientModal = ({
+  deleteClientDisclosure,
   deleteHandler
-}: DeleteUserModalProps) => {
+}: DeleteClientModalProps) => {
 
   return (
     <Modal
-      open={deleteUserDisclosure.isOpen}
-      onClose={deleteUserDisclosure.onClose}
+      open={deleteClientDisclosure.isOpen}
+      onClose={deleteClientDisclosure.onClose}
     >
       <Modal.Header>
         <Modal.Title>
-          Remover usuário
+          Remover cliente
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="text-white">
-        <p className="text-lg">Tem certeza que deseja remover este usuário?</p>
+        <p className="text-lg">Tem certeza que deseja remover este cliente?</p>
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={deleteHandler} appearance="primary">
           Ok
         </Button>
-        <Button onClick={deleteUserDisclosure.onClose} appearance="subtle">
+        <Button onClick={deleteClientDisclosure.onClose} appearance="subtle">
           Cancel
         </Button>
       </Modal.Footer>

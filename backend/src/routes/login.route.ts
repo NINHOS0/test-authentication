@@ -3,6 +3,8 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
 import { prisma } from "../lib/prisma";
 import { validate } from "../utils/validation";
+import jwt from "jsonwebtoken";
+import env from "../utils/env";
 
 export async function LoginRoute(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
@@ -33,7 +35,9 @@ export async function LoginRoute(app: FastifyInstance) {
         return res.status(401).send({error: "Senha incorreta!"})
       }
 
-      return { message: "Login efetuado com sucesso!" }
+      const jwtSignature = jwt.sign({username}, env.JWT_KEY)
+
+      return { message: "Login efetuado com sucesso!", token: jwtSignature }
     }
   );
 };

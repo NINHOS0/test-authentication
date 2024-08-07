@@ -1,17 +1,15 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { LoginFormSchema, type LoginFormType } from "../utils/schemas/users-schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { AxiosResponse } from "axios";
-import { useToast } from "@chakra-ui/toast";
+import type { AxiosError, AxiosResponse } from "axios";
 import { api } from "../lib/axios";
+import Cookies from "js-cookie";
+import { Message, useToaster } from "rsuite";
+import { useNavigate } from "react-router-dom";
 
 export const LoginPage = () => {
-  const toast = useToast({
-    title: "Autenticação",
-    duration: 5000,
-    isClosable: false,
-    position: "bottom-right",
-  });
+  const toaster = useToaster()
+  const navigate = useNavigate()
 
   const {
     register,
@@ -24,44 +22,20 @@ export const LoginPage = () => {
   const onSubmit: SubmitHandler<LoginFormType> = async (data) => {
     const { username, password } = data;
 
-    const response: AxiosResponse = await api
+    api
       .post("/validate", {
         username,
         password,
+      }).then((res) => {
+        Cookies.set("auth-token", res.data.token, {
+          expires: 1,
+        })
+        toaster.push(<Message type="success">{res.data.message ?? "Login efetuado com sucesso!"}</Message>)
+        navigate("/users")
       })
-      .catch((err) => {
-        return err.response;
+      .catch((err: AxiosError<{error?: string}>) => {
+        toaster.push(<Message type="error">{err.response?.data.error ?? "Erro na autenticação!"}</Message>)
       });
-
-    if (!response) {
-      toast({
-        description: "Erro ao conectar-se ao servidor!",
-        status: "error",
-      });
-    }
-
-    if (response.data.error) {
-      toast({
-        description: response.data.error,
-        status: "error",
-      });
-      return;
-    }
-
-    if (response.status !== 200) {
-      toast({
-        description: "Erro na autenticação",
-        status: "error",
-      });
-      return;
-    }
-
-    if (response.data.message) {
-      toast({
-        description: response.data.message,
-        status: "success",
-      });
-    }
   };
 
   return (

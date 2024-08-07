@@ -1,4 +1,11 @@
 
+##TODO
+
+- Validação Backend
+- Validação Frontend
+- Pesquisa por filtro
+- Campos com máscaras
+
 # Projeto Full Stack com Vite e Node.js
 
 Este projeto é um exemplo de uma aplicação `fullstack` utilizando **Vite** no `frontend` e **Node.js** no `backend` para teste de autenticação.

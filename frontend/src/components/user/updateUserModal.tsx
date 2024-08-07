@@ -1,23 +1,11 @@
-import {
-  Button,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  type UseDisclosureReturn,
-} from "@chakra-ui/react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import {
-  UpdateUserFormSchema,
-  type UpdateUserFormType,
-} from "../../utils/schemas/user/UpdateUserSchema";
-import type { UserDataType } from "../../utils/schemas/user/UserData";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
+import { UpdateUserFormSchema, UpdateUserFormType, UserDataType } from "../../utils/schemas/users-schemas";
+import { Button, Modal } from "rsuite";
+
+import { UseDisclosureReturn } from "../../utils/useDisclosure";
+import { Input } from "@chakra-ui/react";
 
 interface UpdateUserModalProps {
   updateUserDisclosure: UseDisclosureReturn;
@@ -40,46 +28,32 @@ export const UpdateUserModal = ({
 
   return (
     <Modal
-      isOpen={updateUserDisclosure.isOpen}
+      open={updateUserDisclosure.isOpen}
       onClose={updateUserDisclosure.onClose}
     >
-      <ModalOverlay />
-      <ModalContent bgColor={"rgb(24, 24, 27)"} color={"white"}>
-        <ModalHeader>Modificar usuário</ModalHeader>
-        <ModalCloseButton
-          onClick={() => {
-            reset();
-          }}
+      <Modal.Header>
+        <Modal.Title>Modificar usuário</Modal.Title>
+      </Modal.Header>
+      <Modal.Body className="flex flex-col gap-2 text-white">
+        <Input
+          placeholder="Nome de usuário"
+          defaultValue={userSelected && userSelected.username}
+          {...register("username")}
         />
-        <ModalBody className="flex flex-col gap-2">
-          <Input
-            placeholder="Nome de usuário"
-            defaultValue={userSelected && userSelected.username}
-            {...register("username")}
-          />
-          <Input
-            placeholder="Nova senha"
-            type="password"
-            {...register("password")}
-          />
-        </ModalBody>
-
-        <ModalFooter>
-          <Button
-            colorScheme="blue"
-            mr={3}
-            onClick={handleSubmit(updateHandler)}
-          >
-            Confirmar
-          </Button>
-          <Button
-            colorScheme="red"
-            onClick={updateUserDisclosure.onClose}
-          >
-            Cancelar
-          </Button>
-        </ModalFooter>
-      </ModalContent>
+        <Input
+          placeholder="Nova senha"
+          type="password"
+          {...register("password")}
+        />
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={handleSubmit(updateHandler)} appearance="primary">
+          Ok
+        </Button>
+        <Button onClick={updateUserDisclosure.onClose} appearance="subtle">
+          Cancel
+        </Button>
+      </Modal.Footer>
     </Modal>
   );
 };
