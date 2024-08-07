@@ -1,20 +1,20 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
-import './global.css'
-import { ChakraProvider } from '@chakra-ui/react'
-import { BrowserRouter } from 'react-router-dom'
-import '@fontsource/roboto/300.css';
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.tsx";
+import "./global.css";
+import { ChakraProvider } from "@chakra-ui/react";
+import { BrowserRouter } from "react-router-dom";
+import "rsuite/dist/rsuite.min.css";
+import { CustomProvider } from "rsuite";
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <ChakraProvider>
-        <App />
+        <CustomProvider theme="dark">
+          <App />
+        </CustomProvider>
       </ChakraProvider>
     </BrowserRouter>
   </React.StrictMode>
-)
+);

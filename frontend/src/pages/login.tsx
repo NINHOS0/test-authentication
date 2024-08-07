@@ -1,5 +1,5 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { FormSchema, FormType } from "../utils/schemas/user/FormSchema";
+import { LoginFormSchema, type LoginFormType } from "../utils/schemas/users-schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { AxiosResponse } from "axios";
 import { useToast } from "@chakra-ui/toast";
@@ -17,11 +17,11 @@ export const LoginPage = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormType>({
-    resolver: zodResolver(FormSchema),
+  } = useForm<LoginFormType>({
+    resolver: zodResolver(LoginFormSchema),
   });
 
-  const onSubmit: SubmitHandler<FormType> = async (data) => {
+  const onSubmit: SubmitHandler<LoginFormType> = async (data) => {
     const { username, password } = data;
 
     const response: AxiosResponse = await api

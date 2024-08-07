@@ -7,14 +7,13 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  ModalOverlay,
-  type UseDisclosureReturn,
+  ModalOverlay
 } from "@chakra-ui/react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import { CreateClientFormSchema, CreateClientFormType } from "../../utils/schemas/clients/CreateClientSchema";
-
+import type { UseDisclosureReturn } from "../../utils/useDisclosure";
+import { CreateClientFormSchema, type CreateClientFormType } from "../../utils/schemas/clients-schemas";
 
 interface CreateClientModalProps {
   createClientDisclosure: UseDisclosureReturn;
@@ -28,7 +27,6 @@ export const CreateClientModal = ({
   const {register, handleSubmit, reset } = useForm<CreateClientFormType>({
     resolver: zodResolver(CreateClientFormSchema)
   });
-
   
   useEffect(() => {
     reset();

@@ -1,21 +1,22 @@
-import {
-  Button, Tooltip,
-  useDisclosure,
-  useToast
-} from "@chakra-ui/react";
+import { Button, useDisclosure, useToast } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { api } from "../lib/axios";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import EditIcon from "@mui/icons-material/Edit";
 import { CreateUserModal } from "../components/user/createUserModal";
 import { DeleteUserModal } from "../components/user/deleteUserModal";
 import type { AxiosError, AxiosResponse } from "axios";
 import type { SubmitHandler } from "react-hook-form";
-import type { CreateUserFormType } from "../utils/schemas/user/CreateUserSchema";
-import type { UpdateUserFormType } from "../utils/schemas/user/UpdateUserSchema";
-import { UpdateUserModal } from "../components/user/updateUserModal";
-import type { UserDataType } from "../utils/schemas/user/UserData";
+import Column from "rsuite/esm/Table/TableColumn";
+import { Cell, HeaderCell, Table } from "rsuite-table";
+import { IconButton } from "rsuite";
+import EditIcon from "@rsuite/icons/Edit";
+import TrashIcon from "@rsuite/icons/Trash";
 import { SideBar } from "../components/sideBar";
+import type {
+  CreateUserFormType,
+  UpdateUserFormType,
+  UserDataType,
+} from "../utils/schemas/users-schemas";
+import { UpdateUserModal } from "../components/user/updateUserModal";
 
 export const UsersPage = () => {
   const createUserDisclosure = useDisclosure();
@@ -116,11 +117,12 @@ export const UsersPage = () => {
     document.title = "Gerenciar usuários";
   }, []);
 
-  useEffect(getData, [users]);
+  useEffect(getData, []);
 
   return (
-    <>
-      <div className="overflow-x-auto m-8">
+    <div className="flex">
+      <SideBar />
+      <div className="overflow-x-auto m-8 flex-1">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-semibold">Usuários</h1>
 
@@ -129,63 +131,64 @@ export const UsersPage = () => {
           </Button>
         </div>
 
-        <table className="grid grid-cols-1 text-left max-w-full">
-          <tr className="grid grid-cols-[24em,10em,24em,5em] gap-1 grid-rows-1 bg-zinc-900">
-            <th>ID</th>
-            <th>Username</th>
-            <th>Password</th>
-            <th className="text-right">Editar</th>
-          </tr>
-          {users.map((user, index) => (
-            <tr
-              className={`grid grid-cols-[24em,10em,24em,5em] gap-1 grid-rows-1 ${index % 2 == 1 && "bg-zinc-900"
-                }`}
-              key={user.username}
-            >
-              <td>{user.id}</td>
-              <td>{user.username}</td>
-              <td>{user.password}</td>
-              <td className="text-right">
-                <Tooltip label="Editar">
-                  <button
+        <Table autoHeight data={users}>
+          <Column width={300} resizable fixed>
+            <HeaderCell>Id</HeaderCell>
+            <Cell dataKey="id" />
+          </Column>
+
+          <Column width={150}>
+            <HeaderCell>Nome</HeaderCell>
+            <Cell dataKey="username" />
+          </Column>
+
+          <Column width={150}>
+            <HeaderCell>Senha</HeaderCell>
+            <Cell dataKey="password" />
+          </Column>
+
+          <Column width={100} fixed="right">
+            <HeaderCell>...</HeaderCell>
+
+            <Cell style={{ paddingInline: "auto", paddingBlock: "5px" }}>
+              {(rowData: UserDataType) => (
+                <div className="flex gap-2">
+                  <IconButton
+                    icon={<EditIcon />}
+                    className="bg-transparent focus:bg-transparent hover:bg-blue-500/25 text-blue-500 hover:text-blue-400 focus:text-blue-500"
                     onClick={() => {
-                      setUserSelected(user);
+                      setUserSelected(rowData);
                       updateUserDisclosure.onOpen();
                     }}
-                  >
-                    <EditIcon />
-                  </button>
-                </Tooltip>
-                <Tooltip label="Deletar">
-                  <button
-                    className="text-red-600"
+                  />
+                  <IconButton
+                    icon={<TrashIcon />}
+                    className="bg-transparent focus:bg-transparent hover:bg-red-500/25 text-red-500 hover:text-red-400 focus:text-red-500"
                     onClick={() => {
-                      setUserSelected(user);
+                      setUserSelected(rowData);
                       deleteUserDisclosure.onOpen();
                     }}
-                  >
-                    <DeleteForeverIcon />
-                  </button>
-                </Tooltip>
-              </td>
-            </tr>
-          ))}
-        </table>
+                  />
+                </div>
+              )}
+            </Cell>
+          </Column>
+        </Table>
       </div>
 
       <CreateUserModal
         createHandler={createHandler}
         createUserDisclosure={createUserDisclosure}
       />
-      <DeleteUserModal
-        deleteHandler={deleteHandler}
-        deleteUserDisclosure={deleteUserDisclosure}
-      />
       <UpdateUserModal
         updateHandler={updateHandler}
         updateUserDisclosure={updateUserDisclosure}
         userSelected={userSelected}
       />
-    </>
+      <DeleteUserModal
+        deleteHandler={deleteHandler}
+        deleteUserDisclosure={deleteUserDisclosure}
+      />
+    </div>
   );
 };
