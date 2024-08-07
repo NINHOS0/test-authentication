@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 const BaseUserSchema = z.object({
-  username: z.string().trim(),
-  password: z.string().trim(),
+  username: z.string().trim().min(1, {message: "Required"}),
+  password: z.string().trim().min(1, {message: "Required"})
 });
 
 const LoginFormSchema = BaseUserSchema

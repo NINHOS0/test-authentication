@@ -4,7 +4,12 @@ import { useEffect } from "react";
 import { Button, Modal } from "rsuite";
 import { Input } from "@chakra-ui/react";
 import { UseDisclosureReturn } from "../../utils/useDisclosure";
-import { ClientDataType, UpdateClientFormSchema, UpdateClientFormType } from "../../utils/schemas/clients-schemas";
+import {
+  ClientDataType,
+  UpdateClientFormSchema,
+  UpdateClientFormType,
+} from "../../utils/schemas/clients-schemas";
+import { MyInput } from "../input";
 
 interface UpdateClientModalProps {
   updateClientDisclosure: UseDisclosureReturn;
@@ -17,9 +22,14 @@ export const UpdateClientModal = ({
   updateHandler,
   clientSelected,
 }: UpdateClientModalProps) => {
-  const { register, handleSubmit, reset } = useForm<UpdateClientFormType>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<UpdateClientFormType>({
     resolver: zodResolver(UpdateClientFormSchema),
-    values: clientSelected
+    values: clientSelected,
   });
 
   useEffect(() => {
@@ -34,27 +44,89 @@ export const UpdateClientModal = ({
       <Modal.Header>
         <Modal.Title>Modificar cliente</Modal.Title>
       </Modal.Header>
-      <Modal.Body className="flex flex-col gap-2 text-white">
-        <Input placeholder="CNPJ" disabled defaultValue={clientSelected?.cnpj}/>
-        <div className="flex gap-2">
-          <Input placeholder="Nome" {...register("name")} />
-          <Input placeholder="Nome Fantasia" {...register("fantasy")} />
+      <Modal.Body className="flex flex-col gap-1 text-white p-1">
+        <MyInput label="CNPJ" disabled defaultValue={clientSelected?.cnpj}/>
+        <div className="flex gap-2 w-full">
+          <MyInput
+            label="Nome"
+            id="name"
+            {...register("name")}
+            error={errors.name && errors.name.message}
+          />
+          <MyInput
+            label="Nome Fantasia"
+            id="fantasy"
+            {...register("fantasy")}
+            error={errors.fantasy && errors.fantasy.message}
+          />
         </div>
         <div className="flex gap-2">
-          <Input placeholder="Endereço" {...register("address")} />
-          <Input placeholder="Número" type="number" {...register("number")} />
+          <MyInput
+            label="Endereço"
+            id="address"
+            {...register("address")}
+            error={errors.address && errors.address.message}
+          />
+          <MyInput
+            label="Número"
+            id="number"
+            {...register("number")}
+            error={errors.number && errors.number.message}
+          />
         </div>
         <div className="flex gap-2">
-          <Input placeholder="Complemento" {...register("complement")} />
-          <Input placeholder="CEP" type="number" {...register("cep")} />
+          <MyInput
+            label="Complemento"
+            id="complement"
+            {...register("complement")}
+            error={errors.complement && errors.complement.message}
+          />
+          <MyInput
+            label="CEP"
+            id="cep"
+            {...register("cep")}
+            error={errors.cep && errors.cep.message}
+          />
         </div>
         <div className="flex gap-2">
-          <Input placeholder="Estado" {...register("state")} />
-          <Input placeholder="Cidade" {...register("city")} />
-          <Input placeholder="Bairro" {...register("district")} />
+          <MyInput
+            label="Estado"
+            id="state"
+            {...register("state")}
+            error={errors.state && errors.state.message}
+          />
+          <MyInput
+            label="Cidade"
+            id="city"
+            {...register("city")}
+            error={errors.city && errors.city.message}
+          />
+          <MyInput
+            label="Bairro"
+            id="district"
+            {...register("district")}
+            error={errors.district && errors.district.message}
+          />
         </div>
-        <Input placeholder="Email" {...register("email")} />
-        <Input placeholder="Telefone" {...register("phone")} />
+        <MyInput
+          label="E-Mail"
+          id="email"
+          type="email"
+          {...register("email")}
+          error={errors.email && errors.email.message}
+        />
+        <MyInput
+          label="Telefone"
+          id="phone"
+          {...register("phone")}
+          error={errors.phone && errors.phone.message}
+        />
+        {/* <MyMaskedInput
+          label="Telefone"
+          id="phone"
+          {...register("phone")}
+          error={errors.phone && errors.phone.message}
+        /> */}
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={handleSubmit(updateHandler)} appearance="primary">

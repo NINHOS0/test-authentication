@@ -2,17 +2,17 @@ import { z } from "zod";
 
 const BaseClientSchema = z.object({
   cnpj: z.string().min(10).max(14),
-  name: z.string(),
+  name: z.string().min(1, {message: "Required"}),
   fantasy: z.string(),
-  address: z.string(),
+  address: z.string().min(1, {message: "Required"}),
   number: z.coerce.number(),
   complement: z.string(),
-  cep: z.coerce.number(),
-  district: z.string(),
-  city: z.string(),
-  state: z.string().min(2).max(2),
+  cep: z.coerce.number().min(1, {message: "Required"}),
+  district: z.string().min(1, {message: "Required"}),
+  city: z.string().min(1, {message: "Required"}),
+  state: z.string().min(2, {message: "Invalid"}).max(2, {message: "Invalid"}),
   email: z.string().email(),
-  phone: z.coerce.number(),
+  phone: z.coerce.number().min(1, {message: "Required"}),
 });
 
 const CreateClientFormSchema = BaseClientSchema;

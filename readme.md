@@ -1,9 +1,9 @@
 
 ##TODO
 
-- Validação Backend
+- Adicionar o  MyInputs
+- Passar o header nas requisições
 - Validação Frontend
-- Pesquisa por filtro
 - Campos com máscaras
 
 # Projeto Full Stack com Vite e Node.js
