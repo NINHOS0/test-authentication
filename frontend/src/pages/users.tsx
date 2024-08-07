@@ -13,14 +13,12 @@ import EditIcon from "@rsuite/icons/Edit";
 import TrashIcon from "@rsuite/icons/Trash";
 import { SideBar } from "../components/sideBar";
 import {
-  UserDataSchema,
   UserFiltersSchema,
   type CreateUserFormType,
   type UpdateUserFormType,
   type UserDataType,
   type UserFilters,
 } from "../utils/schemas/users-schemas";
-import { DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_CREATE_ROOT_CONTAINERS } from "react-dom/client";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 
@@ -87,20 +85,24 @@ export const UsersPage = () => {
   }
 
   function getData() {
-    api.get("/users").then((res) => {
+    document.title = "Gerenciar usuários";
+    const token = Cookies.get("auth-token")
+
+    if (!token) {
+      navigate("/")
+      return
+    }
+
+    api.get("/users", {
+      headers: {
+        "Authorization": token
+      }
+    }).then((res) => {
       setUsers(res.data.users);
     });
   }
 
-  useEffect(() => {
-    document.title = "Gerenciar usuários";
-    const token = Cookies.get("auth-token")
-    if (!token) {
-      navigate("/")
-    }
-  }, []);
-
-  useEffect(getData, []);
+  useEffect(getData, [navigate]);
 
   const getFilters = Object.keys(UserFiltersSchema.shape).map(
     item => ({ label: item, value: item })

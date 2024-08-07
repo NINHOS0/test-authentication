@@ -94,20 +94,24 @@ export const ClientsPage = () => {
   }
 
   function getData() {
-    api.get("/clients").then((res) => {
+    document.title = "Gerenciar clientes"
+    const token = Cookies.get("auth-token")
+    
+    if (!token) {
+      navigate("/")
+      return
+    }
+
+    api.get("/clients", {
+      headers: {
+        "Authorization": token
+      }
+    }).then((res) => {
       setClients(res.data.clients);
     });
   }
 
-  useEffect(() => {
-    document.title = "Gerenciar usuários";
-    const token = Cookies.get("auth-token")
-    if (!token) {
-      navigate("/")
-    }
-  }, []);
-
-  useEffect(getData, []);
+  useEffect(getData, [navigate]);
 
   const getFilters = Object.keys(ClientDataSchema.shape).map(
     item => ({ label: item, value: item })

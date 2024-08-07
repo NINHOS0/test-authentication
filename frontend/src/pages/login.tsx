@@ -6,6 +6,7 @@ import { api } from "../lib/axios";
 import Cookies from "js-cookie";
 import { Message, useToaster } from "rsuite";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export const LoginPage = () => {
   const toaster = useToaster()
@@ -34,9 +35,19 @@ export const LoginPage = () => {
         navigate("/users")
       })
       .catch((err: AxiosError<{error?: string}>) => {
+        console.log(err);
+        
         toaster.push(<Message type="error">{err.response?.data.error ?? "Erro na autenticação!"}</Message>)
       });
   };
+
+  useEffect(() => {
+    document.title = "Login";
+    const token = Cookies.get("auth-token")
+    if (token) {
+      navigate("/users")
+    }
+  }, [navigate]);
 
   return (
     <div className="h-screen flex justify-center items-center">

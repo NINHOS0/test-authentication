@@ -2,12 +2,14 @@ import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
 import { prisma } from "../../lib/prisma";
+import { auth } from "../auth";
 
 
 export async function DeleteUserRoute(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().delete(
     "/api/users/:userId",
     {
+      preHandler: auth,
       schema: {
         params: z.object({
           userId: z.string().uuid(),

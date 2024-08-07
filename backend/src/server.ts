@@ -13,28 +13,47 @@ import { CreateClientRoute } from "./routes/client/create-client.route";
 import { UpdateClientRoute } from "./routes/client/update-client.route";
 import { DeleteClientRoute } from "./routes/client/delete-client.route";
 import { GetClientsRoute } from "./routes/client/get-client.route";
+import { auth } from "./routes/auth";
+import fastifyCookie, { type FastifyCookieOptions } from "@fastify/cookie";
 
-
-const app = Fastify();
-
-app.register(cors, {
-  origin: "*"
-})
-
-app.setValidatorCompiler(validatorCompiler);
-app.setSerializerCompiler(serializerCompiler);
-
-app.register(LoginRoute);
-app.register(CreateUserRoute);
-app.register(UpdateUserRoute);
-app.register(DeleteUserRoute);
-app.register(GetUsersRoute);
-
-app.register(CreateClientRoute);
-app.register(UpdateClientRoute);
-app.register(DeleteClientRoute);
-app.register(GetClientsRoute);
-
-app.listen({ port: 3333 }).then(() => {
-  console.log("Server started");
+const app = Fastify({
+  logger: true,
 });
+
+const start = () => {
+  try {
+    app.register(cors, {
+      origin: "*",
+    });
+
+    app.register(fastifyCookie, {
+      secret: "my-secret", // for cookies signature
+      parseOptions: {}     // options for parsing cookies
+    } as FastifyCookieOptions)
+
+    app.setValidatorCompiler(validatorCompiler);
+    app.setSerializerCompiler(serializerCompiler);
+
+    // app.addHook("preHandler", auth);
+
+    app.register(LoginRoute);
+    app.register(CreateUserRoute);
+    app.register(UpdateUserRoute);
+    app.register(DeleteUserRoute);
+    app.register(GetUsersRoute);
+    
+    app.register(CreateClientRoute);
+    app.register(UpdateClientRoute);
+    app.register(DeleteClientRoute);
+    app.register(GetClientsRoute);
+
+    app.listen({ port: 3333 }).then(() => {
+      console.log("Server started");
+    });
+  } catch (error) {
+    console.log(error);
+    process.exit(1);
+  }
+};
+
+start()

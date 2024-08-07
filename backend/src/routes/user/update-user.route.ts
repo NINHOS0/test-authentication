@@ -3,11 +3,13 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
 import { prisma } from "../../lib/prisma";
 import { hashData } from "../../utils/hashData";
+import { auth } from "../auth";
 
 export async function UpdateUserRoute(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().patch(
     "/api/users/:userId",
     {
+      preHandler: auth,
       schema: {
         params: z.object({
           userId: z.string().uuid(),
