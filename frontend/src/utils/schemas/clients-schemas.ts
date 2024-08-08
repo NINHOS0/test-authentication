@@ -12,7 +12,7 @@ const BaseClientSchema = z.object({
   city: z.string().min(1, {message: "Required"}),
   state: z.string().min(2, {message: "Invalid"}).max(2, {message: "Invalid"}),
   email: z.string().email(),
-  phone: z.coerce.number().min(1, {message: "Required"}),
+  phone: z.coerce.string().min(1, {message: "Required"}),
 });
 
 const CreateClientFormSchema = BaseClientSchema;

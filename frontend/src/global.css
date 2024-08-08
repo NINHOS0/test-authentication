@@ -21,3 +21,23 @@
   font: inherit;
   vertical-align: baseline;
 }
+
+::-webkit-scrollbar {
+  @apply w-2
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  @apply bg-zinc-600
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  @apply bg-blue-500
+  
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-blue-400
+}

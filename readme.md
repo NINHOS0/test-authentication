@@ -1,8 +1,6 @@
 
 ##TODO
 
-- Rotas 'clients' Backend
-- Adicionar o  MyInputs
 - Passar o header nas requisições
 - Validação Frontend
 - Campos com máscaras?

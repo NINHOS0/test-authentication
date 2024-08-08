@@ -1,52 +1,51 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import type { UseDisclosureReturn } from "../../utils/useDisclosure";
-import {
-  CreateClientFormSchema,
-  type CreateClientFormType,
-} from "../../utils/schemas/clients-schemas";
 import { Button, Modal } from "rsuite";
+import { Input } from "@chakra-ui/react";
+import { UseDisclosureReturn } from "../../hooks/useDisclosure";
+import {
+  ClientDataType,
+  UpdateClientFormSchema,
+  UpdateClientFormType,
+} from "../../utils/schemas/clients-schemas";
 import { MyInput } from "../input";
-import { MyMaskedInput } from "../maskedInput";
 
-interface CreateClientModalProps {
-  createClientDisclosure: UseDisclosureReturn;
-  createHandler: SubmitHandler<CreateClientFormType>;
+interface UpdateClientModalProps {
+  updateClientDisclosure: UseDisclosureReturn;
+  updateHandler: SubmitHandler<UpdateClientFormType>;
+  clientSelected: ClientDataType | undefined;
 }
 
-export const CreateClientModal = ({
-  createClientDisclosure,
-  createHandler,
-}: CreateClientModalProps) => {
+export const UpdateClientModal = ({
+  updateClientDisclosure,
+  updateHandler,
+  clientSelected,
+}: UpdateClientModalProps) => {
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<CreateClientFormType>({
-    resolver: zodResolver(CreateClientFormSchema),
+  } = useForm<UpdateClientFormType>({
+    resolver: zodResolver(UpdateClientFormSchema),
+    values: clientSelected,
   });
 
   useEffect(() => {
     reset();
-  }, [createClientDisclosure.isOpen, reset]);
+  }, [updateClientDisclosure.isOpen, reset]);
 
   return (
     <Modal
-      open={createClientDisclosure.isOpen}
-      onClose={createClientDisclosure.onClose}
+      open={updateClientDisclosure.isOpen}
+      onClose={updateClientDisclosure.onClose}
     >
       <Modal.Header>
-        <Modal.Title>Adicionar cliente</Modal.Title>
+        <Modal.Title>Modificar cliente</Modal.Title>
       </Modal.Header>
-      <Modal.Body className="flex flex-col gap-1 text-white p-1">
-        <MyInput
-          label="CNPJ"
-          id="cnpj"
-          {...register("cnpj")}
-          error={errors.cnpj && errors.cnpj.message}
-        />
+      <Modal.Body className="flex flex-col gap-1 text-white p-1 pr-4">
+        <MyInput label="CNPJ" disabled defaultValue={clientSelected?.cnpj}/>
         <div className="flex gap-2 w-full">
           <MyInput
             label="Nome"
@@ -130,11 +129,11 @@ export const CreateClientModal = ({
         /> */}
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={handleSubmit(createHandler)} appearance="primary">
-          Ok
+        <Button onClick={handleSubmit(updateHandler)} appearance="primary">
+          Confirmar
         </Button>
-        <Button onClick={createClientDisclosure.onClose} appearance="subtle">
-          Cancel
+        <Button onClick={updateClientDisclosure.onClose} appearance="subtle" className="!text-red-400 hover:!bg-white/10">
+          Cancelar
         </Button>
       </Modal.Footer>
     </Modal>

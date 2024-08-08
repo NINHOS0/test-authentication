@@ -6,15 +6,13 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { AxiosError } from "axios";
 import { api } from "../lib/axios";
-import Cookies from "js-cookie";
 import { Message, useToaster } from "rsuite";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { MyInput } from "../components/input";
+import { useAuth } from "../contexts/useAuth";
 
 export const LoginPage = () => {
   const toaster = useToaster();
-  const navigate = useNavigate();
+  const { login } = useAuth()
 
   const {
     register,
@@ -26,8 +24,6 @@ export const LoginPage = () => {
 
   const onSubmit: SubmitHandler<LoginFormType> = async (data) => {
     const { username, password } = data;
-    console.log(username.length);
-    
 
     api
       .post("/validate", {
@@ -35,34 +31,25 @@ export const LoginPage = () => {
         password,
       })
       .then((res) => {
-        Cookies.set("auth-token", res.data.token, {
-          expires: 1,
-        });
+        if (!res.data.token) {
+          throw new Error("500: Token não retornado")
+        }
+
+        login(res.data.token)
         toaster.push(
           <Message type="success">
             {res.data.message ?? "Login efetuado com sucesso!"}
           </Message>
         );
-        navigate("/users");
       })
-      .catch((err: AxiosError<{ error?: string }>) => {
-        console.log(err);
-
+      .catch((err: AxiosError<{ message?: string }>) => {
         toaster.push(
           <Message type="error">
-            {err.response?.data.error ?? "Erro na autenticação!"}
+            {err.response?.data.message ?? "Erro na autenticação!"}
           </Message>
         );
       });
   };
-
-  useEffect(() => {
-    document.title = "Login";
-    const token = Cookies.get("auth-token");
-    if (token) {
-      navigate("/users");
-    }
-  }, [navigate]);
 
   return (
     <div className="h-screen flex justify-center items-center">
@@ -77,7 +64,7 @@ export const LoginPage = () => {
               error={errors.username && errors.username.message}
             />
             <MyInput
-              label="Senha"            
+              label="Senha"
               type="password"
               id="password"
               {...register("password")}
@@ -89,13 +76,13 @@ export const LoginPage = () => {
             >
               Entrar
             </button>
-            <span className="text-center font-medium text-sm">
+            {/* <span className="text-center font-medium text-sm">
               {" "}
               Ou tente{" "}
               <a href="" className="text-blue-600 underline">
                 criar uma conta
               </a>
-            </span>
+            </span> */}
           </div>
         </form>
       </div>

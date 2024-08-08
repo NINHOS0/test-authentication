@@ -6,5 +6,5 @@ export const auth = async (request: FastifyRequest, reply: FastifyReply) => {
     return
   }
 
-  reply.status(401).send("Você não está autenticado!")
+  reply.status(401).send({ message: "Você não está autenticado!" })
 }

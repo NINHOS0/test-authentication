@@ -1,14 +1,13 @@
-import { Button, Input, useDisclosure } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { api } from "../lib/axios";
-import { CreateUserModal } from "../components/user/createUserModal";
-import { DeleteUserModal } from "../components/user/deleteUserModal";
-import { UpdateUserModal } from "../components/user/updateUserModal";
+import { CreateUserModal } from "../components/modals/createUserModal";
+import { DeleteUserModal } from "../components/modals/deleteUserModal";
+import { UpdateUserModal } from "../components/modals/updateUserModal";
 import type { AxiosError, AxiosResponse } from "axios";
 import type { SubmitHandler } from "react-hook-form";
 import Column from "rsuite/esm/Table/TableColumn";
 import { Cell, HeaderCell, Table } from "rsuite-table";
-import { IconButton, Message, SelectPicker, useToaster } from "rsuite";
+import { Button, IconButton, Message, SelectPicker, useToaster } from "rsuite";
 import EditIcon from "@rsuite/icons/Edit";
 import TrashIcon from "@rsuite/icons/Trash";
 import { SideBar } from "../components/sideBar";
@@ -19,15 +18,17 @@ import {
   type UserDataType,
   type UserFilters,
 } from "../utils/schemas/users-schemas";
-import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
+import { MyInput } from "../components/input";
+import { useAuth } from "../contexts/useAuth";
+import { useDisclosure } from "../hooks/useDisclosure";
+import { ItemDataType } from "rsuite/esm/MultiCascadeTree";
 
 export const UsersPage = () => {
   const createUserDisclosure = useDisclosure();
   const deleteUserDisclosure = useDisclosure();
   const updateUserDisclosure = useDisclosure();
   const toaster = useToaster();
-  const navigate = useNavigate()
+  const { authToken, hasToken } = useAuth()
 
   const [users, setUsers] = useState<UserDataType[]>([]);
 
@@ -37,14 +38,24 @@ export const UsersPage = () => {
 
   const createHandler: SubmitHandler<CreateUserFormType> = (data) => {
     createUserDisclosure.onClose();
+
+    const isAllowed = hasToken()
+    if(!isAllowed) {
+      return;
+    }
+
     api
-      .post("/users", data)
+      .post("/users", data, {
+        headers: {
+          "Authorization": authToken
+        }
+      })
       .then((res: AxiosResponse<{ message: string; user: UserDataType }>) => {
         toaster.push(<Message type="success">Usuário criado com sucesso!</Message>)
         setUsers([...users, res.data.user]);
       })
-      .catch((err: AxiosError<{ error?: string }>) => {
-        toaster.push(<Message type="error">{err.response?.data.error ?? "Erro ao criar usuário!"}</Message>)
+      .catch((err: AxiosError<{ message?: string }>) => {
+        toaster.push(<Message type="error">{err.response?.data.message ?? "Erro ao criar usuário!"}</Message>)
       });
   };
 
@@ -53,8 +64,18 @@ export const UsersPage = () => {
     if (userSelected === undefined) {
       return;
     }
+    
+    const isAllowed = hasToken()
+    if(!isAllowed) {
+      return;
+    }
+
     api
-      .patch(`/users/${userSelected.id}`, data)
+      .patch(`/users/${userSelected.id}`, data, {
+        headers: {
+          "Authorization": authToken
+        }
+      })
       .then((res: AxiosResponse<{ message: string; user: UserDataType }>) => {
         toaster.push(<Message type="success">Usuário modificado com sucesso!</Message>)
         setUsers(
@@ -63,50 +84,60 @@ export const UsersPage = () => {
           )
         );
       })
-      .catch((err: AxiosError<{ error?: string }>) => {
-        toaster.push(<Message type="error">{err.response?.data.error ?? "Erro ao modificar usuário!"}</Message>)
+      .catch((err: AxiosError<{ message?: string }>) => {
+        toaster.push(<Message type="error">{err.response?.data.message ?? "Erro ao modificar usuário!"}</Message>)
       });
   };
 
   function deleteHandler() {
     deleteUserDisclosure.onClose();
+
+    const isAllowed = hasToken()
+    if(!isAllowed) {
+      return;
+    }
+
     if (userSelected === undefined) {
       return;
     }
     api
-      .delete(`/users/${userSelected.id}`)
-      .then((res) => {
+      .delete(`/users/${userSelected.id}`, {
+        headers: {
+          "Authorization": authToken
+        }
+      })
+      .then(() => {
         toaster.push(<Message type="success">Usuário removido com sucesso!</Message>)
         setUsers(users.filter((user) => user.id !== userSelected.id));
       })
-      .catch((err: AxiosError<{ error?: string }>) => {
-        toaster.push(<Message type="error">{err.response?.data.error ?? "Erro ao remover usuário!"}</Message>)
+      .catch((err: AxiosError<{ message?: string }>) => {
+        toaster.push(<Message type="error">{err.response?.data.message ?? "Erro ao remover usuário!"}</Message>)
       });
   }
 
   function getData() {
-    document.title = "Gerenciar usuários";
-    const token = Cookies.get("auth-token")
-
-    if (!token) {
-      navigate("/")
-      return
+    const isAllowed = hasToken()
+    if(!isAllowed) {
+      return;
     }
-
+    
     api.get("/users", {
       headers: {
-        "Authorization": token
+        "Authorization": authToken
       }
     }).then((res) => {
       setUsers(res.data.users);
     });
   }
 
-  useEffect(getData, [navigate]);
+  useEffect(getData, []);
 
-  const getFilters = Object.keys(UserFiltersSchema.shape).map(
-    item => ({ label: item, value: item })
+  const getFilters: ItemDataType<string>[] = Object.keys(UserFiltersSchema.shape).map(
+    item => {
+      return {value: item.toString(), label: item.toString()}
+    }
   );
+
   const [filterSelected, setFilterSelected] = useState<UserFilters | null>(null)
   const [filteredData, setFilteredData] = useState<UserDataType[] | null>()
 
@@ -134,18 +165,22 @@ export const UsersPage = () => {
                 label="Filtrar"
                 className="w-36"
                 menuClassName="hover:text-white"
-                onChange={(data: UserFilters | null) => setFilterSelected(data)}
+                onChange={(value: UserFilters | null) => setFilterSelected(value)}
               />
               {filterSelected && (
-                <>
-                  <Input className="max-w-64" onChange={(data) => getFilterData(data.target.value)} />
-                </>
+                <div className="max-w-64">
+                  <MyInput placeholder="Filtro" onChange={(data: any) => getFilterData(data.target.value)} />
+                </div>
               )}
 
             </div>
           </div>
 
-          <Button colorScheme="blue" onClick={createUserDisclosure.onOpen}>
+          <Button
+            onClick={createUserDisclosure.onOpen}
+            appearance="primary"
+            size="lg"
+          >
             Adicionar
           </Button>
         </div>
@@ -166,15 +201,15 @@ export const UsersPage = () => {
             <Cell dataKey="password" />
           </Column>
 
-          <Column width={100} fixed="right">
-            <HeaderCell>...</HeaderCell>
+          <Column fixed="right" align="right" minWidth={100} flexGrow={1}>
+            <HeaderCell>Editar</HeaderCell>
 
-            <Cell style={{ paddingInline: "auto", paddingBlock: "5px" }}>
+            <Cell style={{ paddingInline: "auto", paddingBlock: "5px"}} className="!w-full">
               {(rowData: UserDataType) => (
                 <div className="flex gap-2">
                   <IconButton
                     icon={<EditIcon />}
-                    className="bg-transparent focus:bg-transparent hover:bg-blue-500/25 text-blue-500 hover:text-blue-400 focus:text-blue-500"
+                    className="!bg-transparent focus:!bg-transparent hover:!bg-blue-500/25 !text-blue-500 hover:!text-blue-400 focus:!text-blue-500"
                     onClick={() => {
                       setUserSelected(rowData);
                       updateUserDisclosure.onOpen();
@@ -182,7 +217,7 @@ export const UsersPage = () => {
                   />
                   <IconButton
                     icon={<TrashIcon />}
-                    className="bg-transparent focus:bg-transparent hover:bg-red-500/25 text-red-500 hover:text-red-400 focus:text-red-500"
+                    className="!bg-transparent focus:!bg-transparent hover:!bg-red-500/25 !text-red-500 hover:!text-red-400 focus:!text-red-500"
                     onClick={() => {
                       setUserSelected(rowData);
                       deleteUserDisclosure.onOpen();

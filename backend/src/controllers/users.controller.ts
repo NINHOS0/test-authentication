@@ -61,9 +61,7 @@ export class UserController {
     return { message: "Usuário criado com sucesso!", user: newUser };
   }
 
-  static async updateUser(request: FastifyRequest, reply: FastifyReply) {
-    console.log(request.params);
-    
+  static async updateUser(request: FastifyRequest, reply: FastifyReply) {    
     const params = z.object({userId: z.string().trim().uuid()}).safeParse(request.params);
     if (!params.success) {
       return reply.status(400).send({ message: params.error.flatten() });
@@ -113,7 +111,7 @@ export class UserController {
         },
       });
 
-      return { message: "Usuário editado com sucesso!", user: newUser };
+      return { message: "Usuário modificado com sucesso!", user: newUser };
   }
 
   static async deleteUser(request: FastifyRequest, reply: FastifyReply) {

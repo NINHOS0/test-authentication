@@ -2,14 +2,14 @@ import { SubmitHandler } from "react-hook-form";
 import { AxiosError, AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
 import { api } from "../lib/axios";
-import { CreateClientModal } from "../components/client/createClientModal";
+import { CreateClientModal } from "../components/modals/createClientModal";
 import { Button, IconButton, Message, SelectPicker, useToaster } from "rsuite";
 import Column from "rsuite/esm/Table/TableColumn";
 import { Cell, HeaderCell, Table } from "rsuite-table";
 import EditIcon from "@rsuite/icons/Edit";
 import TrashIcon from "@rsuite/icons/Trash";
 import { SideBar } from "../components/sideBar";
-import { useDisclosure } from "../utils/useDisclosure";
+import { useDisclosure } from "../hooks/useDisclosure";
 import {
   ClientDataSchema,
   ClientFilters,
@@ -17,11 +17,10 @@ import {
   type CreateClientFormType,
   type UpdateClientFormType,
 } from "../utils/schemas/clients-schemas";
-import { UpdateClientModal } from "../components/client/updateClientModal";
-import { DeleteClientModal } from "../components/client/deleteClientModal";
-import { Input } from "@chakra-ui/react";
-import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
+import { UpdateClientModal } from "../components/modals/updateClientModal";
+import { DeleteClientModal } from "../components/modals/deleteClientModal";
+import { MyInput } from "../components/input";
+import { useAuth } from "../contexts/useAuth";
 
 
 export const ClientsPage = () => {
@@ -29,7 +28,7 @@ export const ClientsPage = () => {
   const updateClientDisclosure = useDisclosure();
   const deleteClientDisclosure = useDisclosure();
   const toaster = useToaster();
-  const navigate = useNavigate()
+  const { authToken, hasToken } = useAuth()
 
   const [clients, setClients] = useState<ClientDataType[]>([]);
 
@@ -39,18 +38,28 @@ export const ClientsPage = () => {
 
   const createHandler: SubmitHandler<CreateClientFormType> = (data) => {
     createClientDisclosure.onClose();
+
+    const isAllowed = hasToken()
+    if(!isAllowed) {
+      return;
+    }
+
     api
-      .post("/clients", data)
+      .post("/clients", data, {
+        headers: {
+          "Authorization": authToken
+        }
+      })
       .then((res: AxiosResponse<{ message: string; data: ClientDataType }>) => {
         toaster.push(
           <Message type="success">Cliente criado com sucesso!</Message>
         );
         setClients([...clients, res.data.data]);
       })
-      .catch((err: AxiosError<{ error?: string }>) => {
+      .catch((err: AxiosError<{ message?: string }>) => {
         toaster.push(
           <Message type="error">
-            {err.response?.data.error ?? "Erro ao criar cliente!"}
+            {err.response?.data.message ?? "Erro ao criar cliente!"}
           </Message>
         );
       });
@@ -58,22 +67,32 @@ export const ClientsPage = () => {
 
   const updateHandler: SubmitHandler<UpdateClientFormType> = (data) => {
     updateClientDisclosure.onClose()
+
+    const isAllowed = hasToken()
+    if(!isAllowed) {
+      return;
+    }
+
     if (!clientSelected) {
       return;
     }
 
     api
-      .patch(`/clients/${clientSelected.id}`, data)
+      .patch(`/clients/${clientSelected.id}`, data, {
+        headers: {
+          "Authorization": authToken
+        }
+      })
       .then((res) => {
         toaster.push(
           <Message type="success">{res.data.message ?? ""}</Message>
         );
         setClients(clients.map((client) => client.id === clientSelected?.id ? res.data.data : client));
       })
-      .catch((err: AxiosError<{ error?: string }>) => {
+      .catch((err: AxiosError<{ message?: string }>) => {
         toaster.push(
           <Message type="error">
-            {err.response?.data.error ?? "Erro ao modificar cliente!"}
+            {err.response?.data.message ?? "Erro ao modificar cliente!"}
           </Message>
         );
       });
@@ -81,37 +100,44 @@ export const ClientsPage = () => {
 
   const deleteHandler = () => {
     deleteClientDisclosure.onClose()
+
     if (!clientSelected) {
       return
     }
+    
+    const isAllowed = hasToken()
+    if(!isAllowed) {
+      return;
+    }
 
-    api.delete(`/clients/${clientSelected.id}`).then((res) => {
+    api.delete(`/clients/${clientSelected.id}`, {
+      headers: {
+        "Authorization": authToken
+      }
+    }).then((res) => {
       toaster.push(<Message type="success">{res.data.message ?? ""}</Message>)
       setClients(clients.filter((client) => client.id !== clientSelected.id))
-    }).catch((err: AxiosError<{ error?: string }>) => {
-      toaster.push(<Message type="error">{err.response?.data.error ?? "Erro ao remover cliente"}</Message>)
+    }).catch((err: AxiosError<{ message?: string }>) => {
+      toaster.push(<Message type="error">{err.response?.data.message ?? "Erro ao remover cliente"}</Message>)
     })
   }
 
   function getData() {
-    document.title = "Gerenciar clientes"
-    const token = Cookies.get("auth-token")
-    
-    if (!token) {
-      navigate("/")
-      return
+    const isAllowed = hasToken()
+    if(!isAllowed) {
+      return;
     }
 
     api.get("/clients", {
       headers: {
-        "Authorization": token
+        "Authorization": authToken
       }
     }).then((res) => {
       setClients(res.data.clients);
     });
   }
 
-  useEffect(getData, [navigate]);
+  useEffect(getData, []);
 
   const getFilters = Object.keys(ClientDataSchema.shape).map(
     item => ({ label: item, value: item })
@@ -129,7 +155,7 @@ export const ClientsPage = () => {
     setFilteredData(clients.filter((client) => client[filterSelected].toString().toLowerCase().includes(filterData.toLowerCase())))
   }
 
-  
+
   return (
     <div className="flex">
       <SideBar />
@@ -147,9 +173,9 @@ export const ClientsPage = () => {
                 onChange={(data: ClientFilters | null) => setFilterSelected(data)}
               />
               {filterSelected && (
-                <>
-                  <Input className="max-w-64" onChange={(data) => getFilterData(data.target.value)} />
-                </>
+                <div className="max-w-64">
+                  <MyInput placeholder="Filtro" onChange={(data: any) => getFilterData(data.target.value)} />
+                </div>
               )}
 
             </div>
@@ -157,9 +183,8 @@ export const ClientsPage = () => {
 
           <Button
             onClick={createClientDisclosure.onOpen}
-            appearance="ghost"
+            appearance="primary"
             size="lg"
-            className="focus:shadow-none hover:shadow-none"
           >
             Adicionar
           </Button>
@@ -225,15 +250,15 @@ export const ClientsPage = () => {
             <Cell dataKey="city" />
           </Column>
 
-          <Column width={100} fixed="right">
-            <HeaderCell>...</HeaderCell>
+          <Column fixed="right" align="right" minWidth={100} flexGrow={1}>
+            <HeaderCell>Editar</HeaderCell>
 
-            <Cell style={{ paddingInline: "auto", paddingBlock: "5px" }}>
+            <Cell style={{ paddingInline: "auto", paddingBlock: "5px" }} className="!w-full">
               {(rowData: ClientDataType) => (
                 <div className="flex gap-2">
                   <IconButton
                     icon={<EditIcon />}
-                    className="bg-transparent focus:bg-transparent hover:bg-blue-500/25 text-blue-500 hover:text-blue-400 focus:text-blue-500"
+                    className="!bg-transparent focus:!bg-transparent hover:!bg-blue-500/25 !text-blue-500 hover:!text-blue-400 focus:!text-blue-500"
                     onClick={() => {
                       setClientSelected(rowData);
                       updateClientDisclosure.onOpen();
@@ -241,7 +266,7 @@ export const ClientsPage = () => {
                   />
                   <IconButton
                     icon={<TrashIcon />}
-                    className="bg-transparent focus:bg-transparent hover:bg-red-500/25 text-red-500 hover:text-red-400 focus:text-red-500"
+                    className="!bg-transparent focus:!bg-transparent hover:!bg-red-500/25 !text-red-500 hover:!text-red-400 focus:!text-red-500"
                     onClick={() => {
                       setClientSelected(rowData);
                       deleteClientDisclosure.onOpen();

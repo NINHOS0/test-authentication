@@ -3,9 +3,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { UpdateUserFormSchema, UpdateUserFormType, UserDataType } from "../../utils/schemas/users-schemas";
 import { Button, Modal } from "rsuite";
-
-import { UseDisclosureReturn } from "../../utils/useDisclosure";
-import { Input } from "@chakra-ui/react";
+import { UseDisclosureReturn } from "../../hooks/useDisclosure";
+import { MyInput } from "../input";
 
 interface UpdateUserModalProps {
   updateUserDisclosure: UseDisclosureReturn;
@@ -18,8 +17,12 @@ export const UpdateUserModal = ({
   updateHandler,
   userSelected,
 }: UpdateUserModalProps) => {
-  const { register, handleSubmit, reset } = useForm<UpdateUserFormType>({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<UpdateUserFormType>({
     resolver: zodResolver(UpdateUserFormSchema),
+    values: {
+      username: userSelected?.username ?? "",
+      password: ""
+    }
   });
 
   useEffect(() => {
@@ -34,24 +37,27 @@ export const UpdateUserModal = ({
       <Modal.Header>
         <Modal.Title>Modificar usuário</Modal.Title>
       </Modal.Header>
-      <Modal.Body className="flex flex-col gap-2 text-white">
-        <Input
-          placeholder="Nome de usuário"
-          defaultValue={userSelected && userSelected.username}
+      <Modal.Body className="flex flex-col gap-2 text-white p-1 pr-4">
+        <MyInput
+          label="Nome de usuário"
+          id="username"
           {...register("username")}
+          error={errors.username && errors.username.message}
         />
-        <Input
-          placeholder="Nova senha"
+        <MyInput
+          label="Senha"
+          id="password"
           type="password"
           {...register("password")}
+          error={errors.password && errors.password.message}
         />
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={handleSubmit(updateHandler)} appearance="primary">
-          Ok
+          Confirmar
         </Button>
-        <Button onClick={updateUserDisclosure.onClose} appearance="subtle">
-          Cancel
+        <Button onClick={updateUserDisclosure.onClose} appearance="subtle" className="!text-red-400 hover:!bg-white/10">
+          Cancelar
         </Button>
       </Modal.Footer>
     </Modal>

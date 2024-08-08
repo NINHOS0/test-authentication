@@ -3,15 +3,11 @@ import { Nav, Sidenav } from "rsuite";
 import UserBadgeIcon from "@rsuite/icons/UserBadge";
 import GlobalIcon from "@rsuite/icons/Global";
 import ExitIcon from '@rsuite/icons/Exit';
-import Cookies from "js-cookie";
+import { useAuth } from "../contexts/useAuth";
 
 export const SideBar = () => {
   const navigate = useNavigate();
-
-  function logoutHandler() {
-    Cookies.remove("auth-token")
-    navigate("/")
-  }
+  const { logout } = useAuth()
 
   return (
     <div className="w-64 h-screen bg-zinc-900 flex flex-col">
@@ -36,7 +32,7 @@ export const SideBar = () => {
             </Nav.Item>
             <Nav.Item
               icon={<ExitIcon />}
-              onClick={logoutHandler}
+              onClick={logout}
               className="!bg-transparent hover:!bg-white/5 !mt-64"
             >
               Logout

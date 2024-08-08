@@ -5,21 +5,22 @@ import { prisma } from "../lib/prisma";
 import { validate } from "../utils/validation";
 import jwt from "jsonwebtoken";
 import env from "../utils/env";
-import { parse, serialize } from "cookie";
+
+const LoginRouteSchema = z.object({
+  username: z.string().trim(),
+  password: z.string().trim(),
+})
 
 export async function LoginRoute(app: FastifyInstance) {
-  app.withTypeProvider<ZodTypeProvider>().post(
+  app.post(
     "/api/validate",
-    {
-      schema: {
-        body: z.object({
-          username: z.string().trim(),
-          password: z.string().trim(),
-        }),
-      },
-    },
-    async (req, reply) => {
-      const { username, password } = req.body;
+    async (request, reply) => {
+      const body = LoginRouteSchema.safeParse(request.body)
+      if (!body.success) {
+        return reply.status(400).send({ message: body.error.flatten() })
+      }
+
+      const { username, password } = body.data
 
       const user = await prisma.users.findUnique({
         where: {
@@ -28,12 +29,12 @@ export async function LoginRoute(app: FastifyInstance) {
       });
 
       if (!user) {
-        return reply.status(404).send({ error: "Usuário não encontrado!" });
+        return reply.status(404).send({ message: "Usuário não encontrado!" });
       }
 
       const isValidate = await validate(password, user.password);
       if (!isValidate) {
-        return reply.status(401).send({ error: "Senha incorreta!" });
+        return reply.status(401).send({ message: "Senha incorreta!" });
       }
 
       const token = jwt.sign({ username }, env.JWT_KEY);
