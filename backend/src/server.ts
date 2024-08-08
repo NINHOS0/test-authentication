@@ -15,6 +15,7 @@ import { DeleteClientRoute } from "./routes/client/delete-client.route";
 import { GetClientsRoute } from "./routes/client/get-client.route";
 import { auth } from "./routes/auth";
 import fastifyCookie, { type FastifyCookieOptions } from "@fastify/cookie";
+import { UserRoutes } from "./routes/users.route";
 
 const app = Fastify({
   logger: true,
@@ -36,11 +37,12 @@ const start = () => {
 
     // app.addHook("preHandler", auth);
 
+    app.register(UserRoutes)
     app.register(LoginRoute);
-    app.register(CreateUserRoute);
-    app.register(UpdateUserRoute);
-    app.register(DeleteUserRoute);
-    app.register(GetUsersRoute);
+    // app.register(CreateUserRoute);
+    // app.register(UpdateUserRoute);
+    // app.register(DeleteUserRoute);
+    // app.register(GetUsersRoute);
     
     app.register(CreateClientRoute);
     app.register(UpdateClientRoute);

@@ -39,9 +39,9 @@ export const UsersPage = () => {
     createUserDisclosure.onClose();
     api
       .post("/users", data)
-      .then((res: AxiosResponse<{ message: string; data: UserDataType }>) => {
+      .then((res: AxiosResponse<{ message: string; user: UserDataType }>) => {
         toaster.push(<Message type="success">Usuário criado com sucesso!</Message>)
-        setUsers([...users, res.data.data]);
+        setUsers([...users, res.data.user]);
       })
       .catch((err: AxiosError<{ error?: string }>) => {
         toaster.push(<Message type="error">{err.response?.data.error ?? "Erro ao criar usuário!"}</Message>)
@@ -55,11 +55,11 @@ export const UsersPage = () => {
     }
     api
       .patch(`/users/${userSelected.id}`, data)
-      .then((res: AxiosResponse<{ message: string; data: UserDataType }>) => {
+      .then((res: AxiosResponse<{ message: string; user: UserDataType }>) => {
         toaster.push(<Message type="success">Usuário modificado com sucesso!</Message>)
         setUsers(
           users.map((user) =>
-            user.id === userSelected.id ? res.data.data : user
+            user.id === userSelected.id ? res.data.user : user
           )
         );
       })
